@@ -41,7 +41,8 @@ class JWTAuthController extends Controller
 
         return response()->json([
             'message' => 'Successfully registered',
-            'user' => $user
+            'user' => $user,
+            'token'=>$this->createNewToken($token),
         ], 201);
     }
 
