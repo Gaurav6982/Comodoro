@@ -38,7 +38,9 @@ class JWTAuthController extends Controller
                     $validator->validated(),
                     ['password' => bcrypt($request->password)]
                 ));
-
+        if (! $token = auth()->attempt($validator->validated())) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
         return response()->json([
             'message' => 'Successfully registered',
             'user' => $user,
