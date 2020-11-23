@@ -7,7 +7,11 @@ use App\Http\Controllers\Controller;
 use Validator;
 use Illuminate\Http\Request;
 use App\User;
-
+use App\Mail\SendOTP;
+use Illuminate\Support\Facades\Mail;
+use DateTime;
+use DateInterval;
+use Carbon\Carbon;
 class JWTAuthController extends Controller
 {
     /**
@@ -28,23 +32,41 @@ class JWTAuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|between:2,100',
             'email' => 'required|email|unique:users|max:50',
-            'password' => 'required|string|min:6',
         ]);
         if($validator->fails())
-        return response()->json($validator->errors(),422);
+         return response()->json([
+            'status'=>'ERROR',
+            'data'=>$validator->errors(),
+            // 'token'=>$token,
+        ], 422);
+        // return response()->json($validator->errors(),422);
         $user = User::create(array_merge(
                     $validator->validated(),
-                    ['password' => bcrypt($request->password)]
+                    ['password' => bcrypt("123456")]
                 ));
-        if (! $token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (! $token = auth()->attempt(['email'=>$user->email,'password'=>"123456"])) {
+            return response()->json([
+                'status'=>'ERROR',
+                'data'=>['MSG'=>'OTP NOT SENT'],
+                // 'token'=>$token,
+            ], 401);
         }
+        $otp=mt_rand(1111,9999);
+        $user->otp=$otp;
+        $minutes_to_add = 10;
+
+        $time = new DateTime;
+        $time->add(new DateInterval('PT' . $minutes_to_add . 'M'));
+        $dt= $time->format('y-m-d H:i:s');
+        // $datetime->format('g:i:s');
+        $user->otp_expires=$dt;
+        $user->save();
+        Mail::to('gaurav.jss.027@gmail.com')->send(new SendOTP($otp));
         return response()->json([
-            'message' => 'Successfully registered',
-            'user' => $user,
-            'token'=>$this->createNewToken($token),
+            'status'=>'OK',
+            'data'=>['MSG'=>'OTP SENT','token'=>$token],
+            // 'token'=>$token,
         ], 201);
     }
 
@@ -67,7 +89,8 @@ class JWTAuthController extends Controller
         if (! $token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
+        $otp=mt_rand(1111,9999);
+        Mail::to('gaurav.jss.027@gmail.com')->send(new SendOTP($otp));
         return $this->createNewToken($token);
     }
 
@@ -117,5 +140,24 @@ class JWTAuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
+    }
+    protected function verifyOtp(Request $request){
+        $otp=$request->otp;
+        $carbon = Carbon::now();
+        
+        $expire_time=Carbon::create(auth()->user()->otp_expires);
+        // return $now." ".auth()->user()->otp_expires;
+        // return ;
+        // return auth()->user()->otp." ".$otp;
+        if(auth()->user()->otp==$otp && $carbon->lessthan($expire_time))
+        {
+            $user=auth()->user();
+            $user->verified=1;
+            $user->save();
+            // return view('register');
+            return response()->json(['status'=>'OK','data'=>'Verified'], 201);
+        }
+        else 
+        return response()->json(['status'=>'NOT OK','data'=>'Error'], 400);;
     }
 }

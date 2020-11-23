@@ -25,5 +25,12 @@ Route::group([
     Route::post('logout', 'JWTAuthController@logout');
     Route::post('refresh', 'JWTAuthController@refresh');
     Route::get('profile', 'JWTAuthController@profile');
+});
 
+Route::group([
+    'middleware' => 'api',
+    
+], function ($router) {
+    Route::get('reg','MainController@index');
+    Route::post('verifyOtp', 'JWTAuthController@verifyOtp');
 });
