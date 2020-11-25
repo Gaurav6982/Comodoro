@@ -170,13 +170,18 @@ class JWTAuthController extends Controller
         // return $now." ".auth()->user()->otp_expires;
         // return ;
         // return auth()->user()->otp." ".$otp;
-        if(auth()->user()->otp==$otp && $carbon->lessthan($expire_time))
+        if(auth()->user()->otp==$otp)
         {
-            $user=auth()->user();
-            $user->verified=1;
-            $user->save();
-            // return view('register');
-            return response()->json(['status'=>'OK','data'=>'Verified'], 201);
+            if($carbon->lessthan($expire_time))
+            {
+                $user=auth()->user();
+                $user->verified=1;
+                $user->save();
+                // return view('register');
+                return response()->json(['status'=>'OK','data'=>'Verified'], 201);
+            }
+            else
+            return response()->json(['status'=>'NOT OK','data'=>'OTP EXPIRED'], 400);
         }
         else 
         return response()->json(['status'=>'NOT OK','data'=>'INCORRECT OTP'], 400);;
