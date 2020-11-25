@@ -22,7 +22,7 @@ class JWTAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login','logout']]);
     }
 
     /**
@@ -88,9 +88,13 @@ class JWTAuthController extends Controller
         $user->otp_expires=$dt;
         $user->save();
         Mail::to($request->email)->send(new SendOTP($otp));
+        if($new_user)
+        $msg='Account Created';
+        else
+        $msg='Welcome Back!';
         return response()->json([
             'status'=>'OK',
-            'data'=>['MSG'=>'OTP SENT','token'=>$token],
+            'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP SENT','token'=>$token],
             // 'token'=>$token,
         ], 200);
     }
@@ -110,11 +114,18 @@ class JWTAuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        auth()->logout();
+        // return "awd";
+        // $user = JWTAuth::setToken($token)->toUser();
+        // return $user;
+        if(Auth::check()){
+            auth()->logout();
+            return response()->json(['status'=>'OK','data'=> 'Successfully logged out'],200);
+        }
+        else
+        return response()->json(['status'=>'NOT OK','data'=> 'Something Went Wrong!'],400);
 
-        return response()->json(['message' => 'Successfully logged out']);
     }
 
     /**
