@@ -32,7 +32,6 @@ return [
     |            "postmark", "log", "array"
     |
     */
-    'driver' => env('MAIL_DRIVER', 'sendgrid'),
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
