@@ -170,21 +170,26 @@ class JWTAuthController extends Controller
         // return $now." ".auth()->user()->otp_expires;
         // return ;
         // return auth()->user()->otp." ".$otp;
+        if(auth()->user()->verified!=1){
         if(auth()->user()->otp==$otp)
         {
             if($carbon->lessthan($expire_time))
             {
                 $user=auth()->user();
                 $user->verified=1;
+                $user->otp=null;
+                $user->email_verified_at=Carbon::now();
                 $user->save();
                 // return view('register');
-                return response()->json(['status'=>'OK','data'=>'Verified'], 201);
+                return response()->json(['status'=>'OK','data'=>'Verified'], 200);
             }
             else
             return response()->json(['status'=>'NOT OK','data'=>'OTP EXPIRED'], 400);
         }
         else 
-        return response()->json(['status'=>'NOT OK','data'=>'INCORRECT OTP'], 400);;
+        return response()->json(['status'=>'NOT OK','data'=>'INCORRECT OTP'], 400);}
+        else
+        return response()->json(['status'=>'OK','data'=>'Already Verified'], 200);
     }
 
     public function checkVerify(){
