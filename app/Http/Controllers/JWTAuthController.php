@@ -33,20 +33,29 @@ class JWTAuthController extends Controller
     public function register(Request $request)
     {
         $user = auth()->user();
-        if($request->has('name'))
-        $user->name=$request->name;
-        if($request->has('phone'))
-        $user->phone=$request->phone;
-        if($user->save())
-        return response()->json([
-            'status'=>'OK',
-            'data'=>'Registered',
-        ], 200);
+        if($user->verified==1)
+        {
+            if($request->has('name'))
+            $user->name=$request->name;
+            if($request->has('phone'))
+            $user->phone=$request->phone;
+            if($user->save())
+            return response()->json([
+                'status'=>'OK',
+                'data'=>'Registered',
+            ], 200);
+            else
+            return response()->json([
+                'status'=>'NOT OK',
+                'data'=>'NOT Registered',
+            ], 400);
+        }
         else
         return response()->json([
             'status'=>'NOT OK',
-            'data'=>'NOT Registered',
+            'data'=>'NOT Verified',
         ], 400);
+        
     }
 
     /**
