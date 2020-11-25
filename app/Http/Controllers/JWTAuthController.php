@@ -83,7 +83,7 @@ class JWTAuthController extends Controller
 
         $time = new DateTime;
         $time->add(new DateInterval('PT' . $minutes_to_add . 'M'));
-        $dt= $time->format('y-m-d H:i:s');
+        $dt= $time->format('Y-m-d H:i:s');
         // $datetime->format('g:i:s');
         $user->otp_expires=$dt;
         $user->save();
