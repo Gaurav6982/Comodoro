@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUserActivityTable extends Migration
+class CreateUserActivitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateUserActivityTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_activity', function (Blueprint $table) {
+        Schema::create('user_activities', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->index('user_id');
-            $table->foreign('user_id')->on('users')->references('id')->onDelete('cascade');
-            $table->string('device_token');
+            $table->string('email')->nullable();
+            $table->string('otp')->nullable();
+            $table->string('device_token')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateUserActivityTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_activity');
+        Schema::dropIfExists('user_activities');
     }
 }

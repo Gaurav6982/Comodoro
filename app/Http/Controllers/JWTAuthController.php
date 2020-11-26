@@ -13,8 +13,11 @@ use DateTime;
 use DateInterval;
 use Carbon\Carbon;
 use Session;
+use App\TempOtp;
+use App\user_activity;
 class JWTAuthController extends Controller
 {
+    public $temp_email=null;
     /**
      * Create a new AuthController instance.
      *
@@ -22,7 +25,7 @@ class JWTAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','logout']]);
+        $this->middleware('auth:api', ['except' => ['sendOtp','verifyOtp','logout']]);
     }
 
     /**
@@ -39,6 +42,8 @@ class JWTAuthController extends Controller
             $user->name=$request->name;
             if($request->has('phone'))
             $user->phone=$request->phone;
+            if($request->has('age'))
+            $user->age=$request->age;
             if($user->save())
             return response()->json([
                 'status'=>'OK',
@@ -57,13 +62,43 @@ class JWTAuthController extends Controller
         ], 400);
         
     }
+    public function update(Request $request)
+    {
+        $user = auth()->user();
+        if($user->verified==1)
+        {
+            if($request->has('name'))
+            $user->name=$request->name;
+            if($request->has('age'))
+            $user->age=$request->age;
+            if($request->has('phone'))
+            $user->phone=$request->phone;
+            $status=$user->save();
+            if($status)
+            return response()->json([
+                'status'=>'OK',
+                'data'=>'Updated',
+            ], 200);
+            else
+            return response()->json([
+                'status'=>'NOT OK',
+                'data'=>'Something Went Wrong!',
+            ], 400);
+        }
+        else
+        return response()->json([
+            'status'=>'NOT OK',
+            'data'=>'NOT Verified',
+        ], 400);
+        
+    }
 
     /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function sendOtp(Request $request)
     {
     	$validator = Validator::make($request->all(), [
             'email' => 'required|email',
@@ -72,20 +107,11 @@ class JWTAuthController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        Session::put('email', $request->email);
-        $new_user=false;
-        $user=User::where('email',$request->email)->first();
-        if(is_null($user))
-        {
-            $user = User::create(array_merge(
-                $validator->validated(),
-                ['password' => bcrypt("123456")]
-            ));
-            $new_user=true;
-        }
-        if (! $token = auth()->attempt(['email'=>$request->email,'password'=>"123456"])) {
-            return response()->json(['status'=>'ERROR','data'=>['MSG'=>'OTP NOT SENT'] ], 401);
-        }
+        $email=$request->email;
+        Session::put('email',$email);
+        $user=new TempOtp;
+        // $temp_email=$email;
+        $user->email=$email;
         $otp=mt_rand(1111,9999);
         $user->otp=$otp;
         $minutes_to_add = 10;
@@ -97,16 +123,55 @@ class JWTAuthController extends Controller
         $user->otp_expires=$dt;
         $user->save();
         Mail::to($request->email)->send(new SendOTP($otp));
-        if($new_user)
-        $msg='Account Created';
-        else
-        $msg='Welcome Back!';
         return response()->json([
             'status'=>'OK',
-            'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP SENT','token'=>$token],
-            // 'token'=>$token,
+            'data'=>'OTP SENT',
         ], 200);
     }
+    // public function login(Request $request)
+    // {
+    // 	$validator = Validator::make($request->all(), [
+    //         'email' => 'required|email',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+    //     Session::put('email', $request->email);
+    //     $new_user=false;
+    //     $user=User::where('email',$request->email)->first();
+    //     if(is_null($user))
+    //     {
+    //         $user = User::create(array_merge(
+    //             $validator->validated(),
+    //             ['password' => bcrypt("123456")]
+    //         ));
+    //         $new_user=true;
+    //     }
+    //     if (! $token = auth()->attempt(['email'=>$request->email,'password'=>"123456"])) {
+    //         return response()->json(['status'=>'ERROR','data'=>['MSG'=>'OTP NOT SENT'] ], 401);
+    //     }
+    //     $otp=mt_rand(1111,9999);
+    //     $user->otp=$otp;
+    //     $minutes_to_add = 10;
+
+    //     $time = new DateTime;
+    //     $time->add(new DateInterval('PT' . $minutes_to_add . 'M'));
+    //     $dt= $time->format('Y-m-d H:i:s');
+    //     // $datetime->format('g:i:s');
+    //     $user->otp_expires=$dt;
+    //     $user->save();
+    //     Mail::to($request->email)->send(new SendOTP($otp));
+    //     if($new_user)
+    //     $msg='Account Created';
+    //     else
+    //     $msg='Welcome Back!';
+    //     return response()->json([
+    //         'status'=>'OK',
+    //         'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP SENT','token'=>$token],
+    //         // 'token'=>$token,
+    //     ], 200);
+    // }
 
     /**
      * Get the authenticated User.
@@ -164,32 +229,65 @@ class JWTAuthController extends Controller
     }
     protected function verifyOtp(Request $request){
         $otp=$request->otp;
-        $carbon = Carbon::now();
+        // $email=Session::get('email');
+        // return response()->json(['status'=>'OK','data'=>$email], 200);
+        $email=$request->email;
+        if($otp=='')
+        return response()->json(['status'=>'NOT OK','data'=>'OTP NOT RECIEVED'], 400);
+        if($email=='')
+        return response()->json(['status'=>'NOT OK','data'=>'EMAIL NOT RECIEVED'], 400);
         
-        $expire_time=Carbon::create(auth()->user()->otp_expires);
-        // return $now." ".auth()->user()->otp_expires;
-        // return ;
-        // return auth()->user()->otp." ".$otp;
-        if(auth()->user()->verified!=1){
-        if(auth()->user()->otp==$otp)
+        $user=TempOtp::where('email',$email)->orderBy('created_at','desc')->first();
+        if(is_null($user))
+        return response()->json(['status'=>'NOT OK','data'=>'INVALID DATA'], 400);
+        
+        $carbon = Carbon::now();
+        $expire_time=Carbon::create($user->otp_expires);
+        // return $user->otp." ".$otp;
+        if($user->otp==$otp)
         {
             if($carbon->lessthan($expire_time))
             {
-                $user=auth()->user();
+                $validator = Validator::make($request->all(), [
+                    'email' => 'required|email',
+                ]);
+        
+                if ($validator->fails()) {
+                    return response()->json($validator->errors(), 422);
+                }
+                $new_user=false;
+                $user=User::where('email',$email)->first();
+                if(is_null($user))
+                {
+                    $user = User::create(array_merge(
+                        $validator->validated(),
+                        ['password' => bcrypt("123456")]
+                    ));
+                    $new_user=true;
+                }
+                if (! $token = auth()->attempt(['email'=>$request->email,'password'=>"123456"])) {
+                    return response()->json(['status'=>'ERROR','data'=>'Something Went Wrong'], 401);
+                }
                 $user->verified=1;
-                $user->otp=null;
                 $user->email_verified_at=Carbon::now();
                 $user->save();
                 // return view('register');
-                return response()->json(['status'=>'OK','data'=>'Verified'], 200);
+                if($new_user)
+                    $msg='Account Created';
+                    else
+                    $msg='Welcome Back!';
+                    return response()->json([
+                        'status'=>'OK',
+                        'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP SENT','token'=>$token],
+                        // 'token'=>$token,
+                    ], 200);
             }
             else
             return response()->json(['status'=>'NOT OK','data'=>'OTP EXPIRED'], 400);
         }
         else 
-        return response()->json(['status'=>'NOT OK','data'=>'INCORRECT OTP'], 400);}
-        else
-        return response()->json(['status'=>'OK','data'=>'Already Verified'], 200);
+        return response()->json(['status'=>'NOT OK','data'=>'INCORRECT OTP'], 400);
+        
     }
 
     public function checkVerify(){

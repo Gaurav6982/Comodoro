@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddOtpExpiresToUsersTable extends Migration
+class CreateTempEmailOtpTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddOtpExpiresToUsersTable extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->datetime('otp_expires')->nullable();
+        Schema::create('temp_email_otp', function (Blueprint $table) {
+            $table->id();
+            $table->string('email');
+            $table->string('otp');
+            $table->datetime('otp_expires');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ class AddOtpExpiresToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('otp_expires');
-        });
+        Schema::dropIfExists('temp_email_otp');
     }
 }
