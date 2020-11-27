@@ -297,7 +297,7 @@ class JWTAuthController extends Controller
                     $msg='Welcome Back!';
                     return response()->json([
                         'status'=>'OK',
-                        'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP SENT','token'=>$token],
+                        'data'=>['Acc_Status'=>$msg,'MSG'=>'OTP Verified','token'=>$token],
                         // 'token'=>$token,
                     ], 200);
             }
