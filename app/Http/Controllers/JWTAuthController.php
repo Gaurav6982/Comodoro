@@ -55,7 +55,6 @@ class JWTAuthController extends Controller
             
             if($user->save())
             {
-                if(is_null($user->age))
                 return response()->json([
                     'status'=>'OK',
                     'data'=>$msg,
