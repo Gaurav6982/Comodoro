@@ -36,16 +36,14 @@ class JWTAuthController extends Controller
     public function register(Request $request)
     {
         $user = auth()->user();
-        if($user->verified==1)
-        {
+            $msg=$user->verified==0?'Registered':'Updated';
             if($request->has('name'))
             $user->name=$request->name;
-            if($request->has('phone'))
-            $user->phone=$request->phone;
             if($request->has('age'))
             $user->age=$request->age;
             if($request->has('device_token'))
             $user->device_token=$request->device_token;
+            $user->verified=1;
             if($request->hasFile('image'))
             {
                 $imageExt=$request->file('image')->getClientOriginalExtension();
@@ -54,23 +52,20 @@ class JWTAuthController extends Controller
                 $user->image=$fileName;
                 // return url('/storage/user_images/'.$fileName);
             }
+            
             if($user->save())
-            return response()->json([
-                'status'=>'OK',
-                'data'=>'Registered',
-            ], 200);
+            {
+                if(is_null($user->age))
+                return response()->json([
+                    'status'=>'OK',
+                    'data'=>$msg,
+                ], 200);
+            }
             else
             return response()->json([
                 'status'=>'NOT OK',
                 'data'=>'Something Went Wrong!',
-            ], 400);
-        }
-        else
-        return response()->json([
-            'status'=>'NOT OK',
-            'data'=>'NOT Verified',
-        ], 400);
-        
+            ], 400);    
     }
     // public function update(Request $request)
     // {
@@ -131,11 +126,17 @@ class JWTAuthController extends Controller
         $dt= $time->format('Y-m-d H:i:s');
         // $datetime->format('g:i:s');
         $user->otp_expires=$dt;
-        $user->save();
+        
         Mail::to($request->email)->send(new SendOTP($otp));
+        if($user->save())
         return response()->json([
             'status'=>'OK',
             'data'=>'OTP SENT',
+        ], 200);
+        else
+        return response()->json([
+            'status'=>'NOT OK',
+            'data'=>'OTP NOT SENT',
         ], 200);
     }
     // public function login(Request $request)
@@ -287,7 +288,6 @@ class JWTAuthController extends Controller
                 if (! $token = auth()->attempt(['email'=>$request->email,'password'=>"123456"])) {
                     return response()->json(['status'=>'ERROR','data'=>'Something Went Wrong'], 401);
                 }
-                $user->verified=1;
                 $user->email_verified_at=Carbon::now();
                 $user->save();
                 // return view('register');
