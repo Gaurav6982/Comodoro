@@ -14,6 +14,7 @@ use DateInterval;
 use Carbon\Carbon;
 use Session;
 use App\TempOtp;
+use Storage;
 use App\user_activity;
 class JWTAuthController extends Controller
 {
@@ -46,11 +47,13 @@ class JWTAuthController extends Controller
             $user->verified=1;
             if($request->hasFile('image'))
             {
+                if($user->image!=null)
+                    Storage::delete('/public/user_images/'.$user->image);
                 $imageExt=$request->file('image')->getClientOriginalExtension();
                 $fileName=date('ymd')."_".time().'.'.$imageExt;
                 $request->file('image')->move(public_path('/storage/user_images/'),$fileName);
-                $user->image=$fileName;
                 // return url('/storage/user_images/'.$fileName);
+                $user->image=$fileName;
             }
             
             if($user->save())
