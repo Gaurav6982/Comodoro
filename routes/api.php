@@ -25,7 +25,7 @@ Route::group([
     Route::post('logout', 'JWTAuthController@logout');
     Route::post('refresh', 'JWTAuthController@refresh');
     Route::get('profile', 'JWTAuthController@profile');
-    Route::put('update', 'JWTAuthController@update');
+    // Route::put('update', 'JWTAuthController@update');
 });
 
 Route::group([

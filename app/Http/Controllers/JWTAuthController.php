@@ -44,40 +44,20 @@ class JWTAuthController extends Controller
             $user->phone=$request->phone;
             if($request->has('age'))
             $user->age=$request->age;
+            if($request->has('device_token'))
+            $user->device_token=$request->device_token;
+            if($request->hasFile('image'))
+            {
+                $imageExt=$request->file('image')->getClientOriginalExtension();
+                $fileName=date('ymd')."_".time().'.'.$imageExt;
+                $request->file('image')->move(public_path('/storage/user_images/'),$fileName);
+                $user->image=$fileName;
+                // return url('/storage/user_images/'.$fileName);
+            }
             if($user->save())
             return response()->json([
                 'status'=>'OK',
                 'data'=>'Registered',
-            ], 200);
-            else
-            return response()->json([
-                'status'=>'NOT OK',
-                'data'=>'NOT Registered',
-            ], 400);
-        }
-        else
-        return response()->json([
-            'status'=>'NOT OK',
-            'data'=>'NOT Verified',
-        ], 400);
-        
-    }
-    public function update(Request $request)
-    {
-        $user = auth()->user();
-        if($user->verified==1)
-        {
-            if($request->has('name'))
-            $user->name=$request->name;
-            if($request->has('age'))
-            $user->age=$request->age;
-            if($request->has('phone'))
-            $user->phone=$request->phone;
-            $status=$user->save();
-            if($status)
-            return response()->json([
-                'status'=>'OK',
-                'data'=>'Updated',
             ], 200);
             else
             return response()->json([
@@ -92,6 +72,36 @@ class JWTAuthController extends Controller
         ], 400);
         
     }
+    // public function update(Request $request)
+    // {
+    //     $user = auth()->user();
+    //     if($user->verified==1)
+    //     {
+    //         if($request->has('name'))
+    //         $user->name=$request->name;
+    //         if($request->has('age'))
+    //         $user->age=$request->age;
+    //         if($request->has('phone'))
+    //         $user->phone=$request->phone;
+    //         $status=$user->save();
+    //         if($status)
+    //         return response()->json([
+    //             'status'=>'OK',
+    //             'data'=>'Updated',
+    //         ], 200);
+    //         else
+    //         return response()->json([
+    //             'status'=>'NOT OK',
+    //             'data'=>'Something Went Wrong!',
+    //         ], 400);
+    //     }
+    //     else
+    //     return response()->json([
+    //         'status'=>'NOT OK',
+    //         'data'=>'NOT Verified',
+    //     ], 400);
+        
+    // }
 
     /**
      * Get a JWT via given credentials.
@@ -180,7 +190,16 @@ class JWTAuthController extends Controller
      */
     public function profile()
     {
-        return response()->json(auth()->user());
+        $user=auth()->user();
+        $data=[
+            'name'=>$user->name,
+            'email'=>$user->email,
+            'phone'=>$user->phone,
+            'age'=>$user->age,
+            'device_token'=>$user->device_token,
+            'image'=>url('/storage/user_images/'.$user->image),
+        ];
+        return response()->json($data);
     }
 
     /**
