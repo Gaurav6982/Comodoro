@@ -33,6 +33,7 @@ Route::group([
     
 ], function ($router) {
     Route::get('reg','MainController@index');
+    Route::post('delete','JWTAuthController@del');
     Route::post('verifyOtp', 'JWTAuthController@verifyOtp');
     Route::get('checkVerify', 'JWTAuthController@checkVerify');
 });

@@ -26,7 +26,7 @@ class JWTAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['sendOtp','verifyOtp','logout']]);
+        $this->middleware('auth:api', ['except' => ['sendOtp','verifyOtp','logout','del']]);
     }
 
     /**
@@ -315,5 +315,11 @@ class JWTAuthController extends Controller
         if(auth()->user()->verified)
         return response()->json(['status'=>'OK','data'=>'Verified'], 200);
         return response()->json(['status'=>'NOT OK','data'=>'NEED REGISTERATION'], 200);
+    }
+    public function del(Request $request){
+        $user=User::where('email',$request->email)->first();
+        if($user->delete())
+        return response()->json(['status'=>'OK','data'=>"Account Deleted"],200);
+        return response()->json(['status'=>'NOT OK','data'=>"Something Went Wrong"],200);
     }
 }
