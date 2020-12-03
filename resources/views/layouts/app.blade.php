@@ -99,6 +99,34 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" integrity="sha512-F5QTlBqZlvuBEs9LQPqc1iZv2UMxcVXezbHzomzS6Df4MZMClge/8+gXrKw2fl5ysdk4rWjR0vKS7NNkfymaBQ==" crossorigin="anonymous"></script>
+                <!-- firebase integration started -->
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+            <script src="/__/firebase/8.1.1/firebase-app.js"></script>
+
+            <!-- TODO: Add SDKs for Firebase products that you want to use
+                https://firebase.google.com/docs/web/setup#available-libraries -->
+
+            <!-- Initialize Firebase -->
+            <script src="/__/firebase/init.js"></script>
+
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
+        <!-- Firebase App is always required and must be first -->
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-app.js"></script>
+
+        <!-- Add additional services that you want to use -->
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-messaging.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-functions.js"></script>
+
+        <!-- firebase integration end -->
+
+        <!-- Comment out (or don't include) services that you don't want to use -->
+        <!-- <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase-storage.js"></script> -->
+
+        <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-analytics.js"></script>
         @yield('js')
     </body>
 </html>

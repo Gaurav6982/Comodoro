@@ -4,7 +4,7 @@
 
     <button class="btn btn-info">Show Login Form</button>
     <button class="btn btn-primary btn-rounded mb-4"  data-toggle="modal" data-target="#modalLoginForm">Show Register Form</button>
-
+    <a href="/fcm/send" class="btn btn-danger"> Send</a>
     {{-- //register modal --}}
     <div class="modal fade" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
   aria-hidden="true">

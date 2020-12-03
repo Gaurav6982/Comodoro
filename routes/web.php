@@ -16,5 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('/fcm','FCMController@index');
+Route::get('/fcm/send','FCMController@send');
     // Route::get('/reg','MainController@index');
