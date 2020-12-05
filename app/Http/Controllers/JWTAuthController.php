@@ -287,7 +287,7 @@ class JWTAuthController extends Controller
                     ));
                     $new_user=true;
                 }
-                if($user->verified==1)
+                if($user->verified!=1)
                 $new_user=true;
                 if (! $token = auth()->attempt(['email'=>$request->email,'password'=>"123456"])) {
                     return response()->json(['status'=>'ERROR','data'=>'Something Went Wrong'], 401);
