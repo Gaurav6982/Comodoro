@@ -28,7 +28,49 @@ class JWTAuthController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['sendOtp','verifyOtp','logout','del']]);
     }
-
+    /**
+     * Register a User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request,$email)
+    {
+        $user = User::where('email',$email)->first();
+        // return $user;    
+        return $request->all();
+        // $msg=$user->verified==0?'Registered':'Updated';    
+        if($request->has('name'))
+            $user->name=$request->name;
+            if($request->has('phone'))
+            $user->phone=$request->phone;
+            if($request->has('age'))
+            $user->age=$request->age;
+            if($request->has('device_token'))
+            $user->device_token=$request->device_token;
+            if($request->hasFile('image'))
+            {
+                if($user->image!=null)
+                    Storage::delete('/public/user_images/'.$user->image);
+                $imageExt=$request->file('image')->getClientOriginalExtension();
+                $fileName=date('ymd')."_".time().'.'.$imageExt;
+                $request->file('image')->move(public_path('/storage/user_images/'),$fileName);
+                // return url('/storage/user_images/'.$fileName);
+                $user->image=$fileName;
+            }
+            
+            if($user->save())
+            {
+                return response()->json([
+                    'status'=>'OK',
+                    'data'=>'Updated',
+                ], 200);
+            }
+            else
+            return response()->json([
+                'status'=>'NOT OK',
+                'data'=>'Something Went Wrong!',
+            ], 400);    
+    }
     /**
      * Register a User.
      *
@@ -36,13 +78,15 @@ class JWTAuthController extends Controller
      */
     public function register(Request $request)
     {
+        
         $user = auth()->user();
             $msg=$user->verified==0?'Registered':'Updated';
-            if($request->has('name'))
+            // if($request->has('name'))
             $user->name=$request->name;
-            if($request->has('age'))
+            // if($request->has('age'))
             $user->age=$request->age;
-            if($request->has('device_token'))
+            $user->phone=$request->phone;
+            // if($request->has('device_token'))
             $user->device_token=$request->device_token;
             $user->verified=1;
             if($request->hasFile('image'))

@@ -32,7 +32,9 @@ Route::group([
     'middleware' => 'api',
     
 ], function ($router) {
+    
     Route::get('reg','MainController@index');
+    Route::put('update/{email}','JWTAuthController@update');
     Route::post('delete','JWTAuthController@del');
     Route::post('verifyOtp', 'JWTAuthController@verifyOtp');
     Route::get('checkVerify', 'JWTAuthController@checkVerify');
