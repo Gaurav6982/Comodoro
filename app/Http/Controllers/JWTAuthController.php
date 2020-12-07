@@ -47,6 +47,8 @@ class JWTAuthController extends Controller
             $user->age=$request->age;
             if($request->has('device_token'))
             $user->device_token=$request->device_token;
+            if($request->has('device_token_pc'))
+            $user->device_token_pc=$request->device_token_pc;
             if($request->hasFile('image'))
             {
                 if($user->image!=null)
@@ -81,13 +83,16 @@ class JWTAuthController extends Controller
         
         $user = auth()->user();
             $msg=$user->verified==0?'Registered':'Updated';
-            // if($request->has('name'))
+            if($request->has('name'))
             $user->name=$request->name;
-            // if($request->has('age'))
+            if($request->has('age'))
             $user->age=$request->age;
+            if($request->has('phone'))
             $user->phone=$request->phone;
-            // if($request->has('device_token'))
+            if($request->has('device_token'))
             $user->device_token=$request->device_token;
+            if($request->has('device_token_pc'))
+            $user->device_token_pc=$request->device_token_pc;
             $user->verified=1;
             if($request->hasFile('image'))
             {
@@ -243,7 +248,6 @@ class JWTAuthController extends Controller
             'email'=>$user->email,
             'phone'=>$user->phone,
             'age'=>$user->age,
-            'device_token'=>$user->device_token,
             'image'=>url('/storage/user_images/'.$user->image),
         ];
         return response()->json($data);
@@ -362,8 +366,8 @@ class JWTAuthController extends Controller
         return response()->json(['status'=>'OK','data'=>'Verified'], 200);
         return response()->json(['status'=>'NOT OK','data'=>'NEED REGISTERATION'], 200);
     }
-    public function del(Request $request){
-        $user=User::where('email',$request->email)->first();
+    public function del($email){
+        $user=User::where('email',$email)->first();
         if($user->delete())
         return response()->json(['status'=>'OK','data'=>"Account Deleted"],200);
         return response()->json(['status'=>'NOT OK','data'=>"Something Went Wrong"],200);
