@@ -18,6 +18,7 @@ class CreateRemindersTable extends Migration
             $table->foreignId('event_id');
             $table->foreign('event_id')->references('id')->on('events');
             $table->string('reminder');
+            $table->boolean('priority')->default(false);
             $table->datetime('date');
             $table->integer('snooze_before');
             $table->integer('difference');
