@@ -145,6 +145,9 @@ class EventController extends Controller
             // }
             array_push($Res,$n);
         }
-        return $Res;
+        return response()->json([
+            'status'=>'OK',
+            'data'=>$Res
+        ],200);
     }
 }
