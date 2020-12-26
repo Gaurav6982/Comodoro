@@ -58,14 +58,18 @@ class EventController extends Controller
             "data"=>"USER NOT REGISTERED"
         ],200);
         $event=Events::where('user_id',auth()->user()->id)->where('event_name',strtolower($request->event_name))->first();
-        // return $event;
+
+        //Zealicon<space>20 && Zealicon<sapce><space>20 should be same
+        // $format_name=
+        //Ends here same name unequal space
+
         if(!is_null($event))
         return response()->json([
             "status"=>"NOT OK",
             "data"=>"Event Already Exist"
         ],500);
         $event=new Events;
-        $event->event_name=strtolower($request->event_name);
+        $event->event_name=$request->event_name;
         $event->user_id=auth()->user()->id;
         if($event->save())
         return response()->json([
