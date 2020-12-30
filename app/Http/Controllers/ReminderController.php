@@ -36,7 +36,8 @@ class ReminderController extends Controller
     public function store(Request $request)
     {
         //Create Reminder
-        $event=Events::where('user_id',auth()->user()->id)->where('event_name',strtolower($request->event_name))->first();
+        $event=Events::where('user_id',auth()->user()->id)->where('event_name',$request->event_name)->first();
+        // return $event;
         if(is_null($event))
         return response()->json([
             'status'=>'NOT OK',
