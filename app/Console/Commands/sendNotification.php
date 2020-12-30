@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\User;
 use App\Reminders;
 use Carbon\Carbon;
+use DateTime;
 class sendNotification extends Command
 {
     /**
@@ -39,10 +40,13 @@ class sendNotification extends Command
      */
     public function handle()
     {
-        $rms=Reminders::where('date',Carbon::now())->get();
+        $var=Carbon::parse("2020-12-30 22:55:00")->toDateTimeString()."\n";
+        echo $var;
+        $rms=Reminders::whereDate('date',"=",Carbon::parse("2020-12-30 22:55:00"))->get();
         foreach($rms as $r)
         {
-            echo $r->user."\n";
+            // echo "eell\n";
+            echo $r->event->user->name."\n";
         }
         echo Carbon::now()."\n";
     }
